@@ -100,7 +100,6 @@ class Runner(object):
                 raise TimeoutError()
 
     def getfrom(self, host_name, variable_name, timeout=5) -> object:
-        # print("running!")
         if host_name in self.__variable_pool and\
             variable_name in self.__variable_pool[host_name]:
             return self.__variable_pool[host_name][variable_name]

@@ -23,7 +23,6 @@ class Parser(object):
         source_code_iter = tokenize.tokenize(source_code_copy_byte.readline)
 
         for token_type, token_val, *_ in source_code_iter:
-            # print(token_type, token_val, type(token_val))
             if token_type == tokenize.COMMENT:
                 temp_token_val = token_val[1:]
                 if temp_token_val.startswith("getfrom"):
@@ -35,7 +34,7 @@ class Parser(object):
 
         source = tokenize.untokenize(tokens)
 
-        with open("aaa.py", "wb") as s:
+        with open("parsed.py", "wb") as s:
             s.write(source)   
 
     #     expansion_info = []
