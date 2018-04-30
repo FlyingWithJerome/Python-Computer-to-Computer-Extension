@@ -7,11 +7,6 @@ parsed program
 
 class Template(object):
 
-    get_from = \
-    '''
-    {variable_name} = self.getfrom("{hostname}", "{pool_name}")
-    '''
-
     get_from_eval = \
     '''
     [
@@ -26,11 +21,6 @@ class Template(object):
         (tokenize.STRING  , '"{pool_name}"'),
         (tokenize.N_TOKENS, ")")
     ]
-    '''
-
-    send_to = \
-    '''
-    self.sendto("{hostname}", "{variable_name}", {variable_name})
     '''
 
     send_to_eval = \

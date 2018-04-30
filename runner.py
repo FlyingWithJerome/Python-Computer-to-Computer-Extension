@@ -17,8 +17,6 @@ from collections import defaultdict
 
 class Runner(object):
 
-    WAIT_FOR_SYNC = 0
-
     def __init__(self, self_name="host1", program=None, metadata="metadata.txt"):
 
         self.__make_socket()
@@ -38,7 +36,7 @@ class Runner(object):
         else:
             self.__synchronize("host1", serial=-1)
 
-        print(self_name, "SYNC OK! -1")
+        print(self_name, " SYNC OK")
 
         start = time.time()
         self.__run()

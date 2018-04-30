@@ -3,7 +3,9 @@ parser.py
 
 This code implements the parser
 '''
+import os.path
 import re
+import sys
 import tokenize
 
 from io import StringIO, BytesIO
@@ -14,7 +16,8 @@ class Parser(object):
 
     def __init__(self, source_code_path:str):
 
-        tokens = []
+        tokens    = []
+        file_name = os.path.basename(source_code_path)
         with open(source_code_path, "r") as source_code:
             source_raw = source_code.read()
             source_code_copy_str  = StringIO(source_raw)
@@ -25,39 +28,15 @@ class Parser(object):
         for token_type, token_val, *_ in source_code_iter:
             if token_type == tokenize.COMMENT:
                 temp_token_val = token_val[1:]
-                if temp_token_val.startswith("getfrom"):
-                    print("extending")
-                    res = Parser.parse_and_expand_instruction(temp_token_val)
-                    tokens.extend(res)
+                res = Parser.parse_and_expand_instruction(temp_token_val)
+                tokens.extend(res)
             else:
                 tokens.append((token_type, token_val))
 
         source = tokenize.untokenize(tokens)
 
-        with open("parsed.py", "wb") as s:
+        with open("{}_parsed.py".format(file_name), "wb") as s:
             s.write(source)   
-
-    #     expansion_info = []
-    #     for (message), (start_row, start_col) in tokens:
-    #         if message.startswith("getfrom"):
-    #             host, variable = Parser.parse_get_from(message)
-    #             expansion_info.append((message, start_row, start_col, host, variable))
-    #         elif message.startswith("sendto"):
-    #             host, variable = Parser.parse_send_to(message)
-    #             expansion_info.append((message, start_row, start_col, host, variable))
-
-    #     self.__expander(expansion_info)
-
-    # def __expander(self, expansion_information):
-    #     for exp in expansion_information:
-    #         self.__expand_single_instruction(*exp)
-
-    # def __expand_single_instruction(self, *expansion_info):
-    #     assert len(expansion_info) > 3
-
-    #     message, start_row, start_col, *metavar = expansion_info
-
-    #     print(message)
 
     @staticmethod
     def parse_and_expand_instruction(string_value) -> [(int, str)]:
@@ -73,10 +52,11 @@ class Parser(object):
                 new_instruction = template.Template.send_to_eval
                 new_instruction = new_instruction.format(host_name=host, variable_name=var)
                 return eval(new_instruction.strip())
+            else:
+                return [(tokenize.COMMENT, string_value),]
 
-        except AttributeError as e:
-            print(e)
-            return [string_value]
+        except:
+            return [(tokenize.COMMENT, string_value),]
 
     @staticmethod
     def parse_get_from(string):
@@ -100,6 +80,6 @@ class Parser(object):
         
 
 if __name__ == "__main__":
-    p = Parser("sample_code.py")
+    p = Parser(sys.argv[1])
         
 
