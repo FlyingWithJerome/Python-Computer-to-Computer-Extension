@@ -41,17 +41,41 @@ class Parser(object):
     @staticmethod
     def parse_and_expand_instruction(string_value) -> [(int, str)]:
         try:
+            # parse getfrom
             if string_value.startswith("getfrom"):
                 host_name, pool_name, var_name = Parser.parse_get_from(string_value)
                 new_instruction = template.Template.get_from_eval
                 new_instruction = new_instruction.format(host_name=host_name, pool_name=pool_name, variable_name=var_name)
                 return eval(new_instruction.strip())
             
+            # parse sendto
             elif string_value.startswith("sendto"):
                 host, var = Parser.parse_send_to(string_value)
                 new_instruction = template.Template.send_to_eval
                 new_instruction = new_instruction.format(host_name=host, variable_name=var)
                 return eval(new_instruction.strip())
+
+            # parse broadcast
+            elif string_value.startswith("broadcast"):
+                host, var = Parser.parse_broadcast(string_value)
+                new_instruction = template.Template.broadcast_eval
+                new_instruction = new_instruction.format(variable_name=var)
+                return eval(new_instruction.strip())
+
+            # parse synchronize
+            elif string_value.startswith("synchronize"):
+                host, ser = Parser.parse_synchronize(string_value)
+                new_instruction = template.Template.synchronize_eval
+                new_instruction = new_instruction.format(host_name=host, serial_num=ser)
+                return eval(new_instruction.strip())
+
+            # parse getfrom_nonblock
+            elif string_value.startswith("getfrom_nonblock"):
+                host, ser = Parser.parse_synchronize(string_value)
+                new_instruction = template.Template.getfrom_nonblock_eval
+                new_instruction = new_instruction.format(host_name=host, serial_num=ser)
+                return eval(new_instruction.strip())
+
             else:
                 return [(tokenize.COMMENT, string_value),]
 
@@ -60,6 +84,14 @@ class Parser(object):
 
     @staticmethod
     def parse_get_from(string):
+        arguments =\
+        string[len("getfrom("):-len(")")]
+
+        [host, pool_name, variable_name] = arguments.split(",")
+        return host.strip(), pool_name.strip(), variable_name.strip()
+
+    @staticmethod
+    def parse_get_from_nonblock(string):
         arguments =\
         string[len("getfrom("):-len(")")]
 
@@ -75,8 +107,21 @@ class Parser(object):
         return host.strip(), variable_name.strip()
     
     @staticmethod
-    def parse_block_until(string):
-        raise NotImplementedError("waited to be implemented")
+    def parse_synchronize(string):
+        arguments =\
+        string[len("syncrhonize("):-len(")")]
+
+        [host, serial] = arguments.split(",")
+        return host.strip(), serials.strip()
+
+    @staticmethod
+    def parse_broadcast(string):
+        arguments =\
+        string[len("broadcast("):-len(")")]
+
+        [variable_name] = arguments.split(",")
+        return variable_name.strip()
+    
         
 
 if __name__ == "__main__":

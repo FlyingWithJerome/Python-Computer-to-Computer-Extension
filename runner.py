@@ -42,6 +42,7 @@ class Runner(object):
         print(self_name, " SYNC OK")
 
         start = time.time()
+
         self.__run()
 
         print("{:.3f}".format(time.time()-start))
@@ -69,7 +70,7 @@ class Runner(object):
                     return
             except BlockingIOError:
                 pass
-            time.sleep(.5)
+            time.sleep(.2)
 
 
     def sendto(self, host_name, variable_name, data):
@@ -86,11 +87,8 @@ class Runner(object):
         while True:
             try:
                 data = self.__socket_member.recv(1000)
-                print("get a data")
                 host, var_name, value = pickle.loads(data)
-                print("received data", host, var_name, value)
                 if host == host_name and var_name == variable_name:
-                    print("get ONE!")
                     self.__variable_pool[host_name][variable_name] = value
                     return
             except (BlockingIOError, ValueError, _pickle.UnpicklingError):
@@ -103,7 +101,7 @@ class Runner(object):
     def synchronize(self, host_name, serial_num=-1):
         self.__synchronize(host_name, serial=serial_num)
 
-    def broadcast(variable_name, data):
+    def broadcast(self, variable_name, data):
         if len(self.__ip_table) < 2:
             raise RunnerError("Does not have any target to braodcast")
         for name in self.__ip_table:
