@@ -15,6 +15,9 @@ import time
 
 from collections import defaultdict
 
+class RunnerError(Exception):
+    pass
+
 class Runner(object):
 
     def __init__(self, self_name="host1", program=None, metadata="metadata.txt"):
@@ -95,7 +98,24 @@ class Runner(object):
             
             if event.is_set():
                 del event
-                raise TimeoutError()
+                raise RunnerError("Cannot get the data from {} in timeout".format(host_name))
+
+    def synchronize(self, host_name, serial_num=-1):
+        self.__synchronize(host_name, serial=serial_num)
+
+    def broadcast(variable_name, data):
+        if len(self.__ip_table) < 2:
+            raise RunnerError("Does not have any target to braodcast")
+        for name in self.__ip_table:
+            if name != self.__name:
+                self.sendto(name, variable_name, data)
+
+    def getfrom_nonblock(self, host_name, variable_name) -> object:
+        if host_name in self.__variable_pool and\
+            variable_name in self.__variable_pool[host_name]:
+            return self.__variable_pool[host_name][variable_name]
+        else:
+            return None
 
     def getfrom(self, host_name, variable_name, timeout=5) -> object:
         if host_name in self.__variable_pool and\
@@ -112,7 +132,6 @@ class Runner(object):
 
             if variable_name in self.__variable_pool[host_name]:
                 return self.__variable_pool[host_name][variable_name]
-
 
     def __del__(self):
         '''
